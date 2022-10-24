@@ -7,3 +7,5 @@ _Forked from [dan-snelson Setup Your Mac](https://github.com/dan-snelson/dialog-
 - Changed relevant Installs away from original version
 - Set to run on enrollment trigger instead of Self Service
 - Customized branding
+
+![Screenshot](Setup-Your-Mac.png)
