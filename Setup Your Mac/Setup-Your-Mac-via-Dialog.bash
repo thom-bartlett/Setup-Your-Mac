@@ -3,7 +3,15 @@
 ####################################################################################################
 #
 # Setup Your Mac via swiftDialog
-# https://snelson.us/setup-your-mac
+#
+# Purpose: Leverages swiftDialog v1.11.2 (or later) (https://github.com/bartreardon/swiftDialog/releases) and 
+# Jamf Pro Policy Custom Events to allow end-users to self-complete Mac setup post-enrollment
+#
+# Inspired by: Rich Trouton (@rtrouton) and Bart Reardon (@bartreardon)
+#
+# Based on:
+# - Adam Codega (@adamcodega)'s https://github.com/acodega/dialog-scripts/blob/main/MDMAppsDeploy.sh
+# - James Smith (@smithjw)'s https://github.com/smithjw/swiftEnrolment
 #
 ####################################################################################################
 #
@@ -14,6 +22,12 @@
 #   - Re-ordered Setup Your Mac progress bar commands
 #   More specific logging for various dialog update functions
 #   Confirm Setup Assistant complete and user at Desktop (thanks, @ehemmete!)
+# HISTORY
+#
+# Version 1.2.8, 17-Sep-2022, Dan K. Snelson (@dan-snelson)
+#   Replaced "ugly" `completionAction` `if … then … else` with "more readabale" `case` statement (thanks, @pyther!)
+#   Updated "method for determining laptop/desktop" (thanks, @acodega and @scriptingosx)
+#   Additional tweaks discovered during internal production deployment
 #
 ####################################################################################################
 
@@ -26,7 +40,7 @@
 ####################################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Script Version & Jamf Pro Script Parameters
+# Script Version & Debug Mode (Jamf Pro Script Parameter 4)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 scriptVersion="1.2.10"
@@ -37,8 +51,6 @@ completionAction="${6}" # ( number of seconds to sleep | wait, blank )
 if [[ ${debugMode} == "true" ]]; then
     scriptVersion="Dialog: v$(dialog --version) • Setup Your Mac: v${scriptVersion}"
 fi
-
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Check for an allowed "Completion Action" value (Parameter 6); defaults to "wait"
@@ -91,6 +103,128 @@ policy_array=('
 {
     "steps": [
         {
+            "listitem": "Zoom",
+            "icon": "92b8d3c448e7d773457532f0478a428a0662f694fbbfc6cb69e1fab5ff106d97",
+            "progresstext": "Zoom is a videotelephony software program developed by Zoom Video Communications.",
+            "trigger_list": [
+                {
+                    "trigger": "zoom",
+                    "path": "/Applications/zoom.us.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Slack",
+            "icon": "395aed4c1bf684b6abd0e5587deb60aa6774dc2a525fed2d9df2b95293b72b2c",
+            "progresstext": "Slack is a new way to communicate with your team. It’s faster, better organized, and more secure than email.",
+            "trigger_list": [
+                {
+                    "trigger": "slack",
+                    "path": "/Applications/Slack.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Google Chrome",
+            "icon": "12d3d198f40ab2ac237cff3b5cb05b09f7f26966d6dffba780e4d4e5325cc701",
+            "progresstext": "Google Chrome is a browser that combines a minimal design with sophisticated technology to make the Web faster.",
+            "trigger_list": [
+                {
+                    "trigger": "googlechromepkg",
+                    "path": "/Applications/Google Chrome.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Google Drive",
+            "icon": "06daf9a94b41e43bc9e9d3339018769f1862bf8b0646c2795996fa01d25db7ba",
+            "progresstext": "Google Drive is a file storage and synchronization service developed by Google",
+            "trigger_list": [
+                {
+                    "trigger": "googledrive",
+                    "path": "/Applications/Google Drive.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Asana",
+            "icon": "65887f3e16ae8e8d04059cbe89d91098544e66b758571bb4ae955261039e3ae2",
+            "progresstext": "A way to easily communicate across teams, manage projects in one place, and reclaim more time with seamless collaboration.",
+            "trigger_list": [
+                {
+                    "trigger": "asana",
+                    "path": "/Applications/Asana.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Microsoft Word",
+            "icon": "02d85f833abb84627237d2109ca240ca9ee4dc8d9db299996d45363e3034166d",
+            "progresstext": "The trusted Word app lets you create, edit, view, and share your files with others quickly and easily.",
+            "trigger_list": [
+                {
+                    "trigger": "microsoftword",
+                    "path": "/Applications/Microsoft Word.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Microsoft Excel",
+            "icon": "47b16c524f57020290de1a510a7abeb3aa992b15a583c2db74c4e28f3caf7e77",
+            "progresstext": "Microsoft Excel is the industry leading spreadsheet software program, a powerful data visualization and analysis tool.",
+            "trigger_list": [
+                {
+                    "trigger": "microsoftexcel",
+                    "path": "/Applications/Microsoft Excel.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Okta Verify",
+            "icon": "eec6872b106f8a959ba29514fd993fc67de4aa910ed750956b9a3cf1d5e0b22c",
+            "progresstext": "Okta Verify is a lightweight app that allows you to securely access your apps via 2-step verification.",
+            "trigger_list": [
+                {
+                    "trigger": "",
+                    "path": "/Applications/Okta Verify.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Jamf Connect",
+            "icon": "4cfbe08bd808b4fc6ebe6bef6cab758c119339241099860824a9944397f44d5d",
+            "progresstext": "Jamf Connect Streamline Mac authentication and identity management.",
+            "trigger_list": [
+                {
+                    "trigger": "jamfconnectenroll",
+                    "path": "/Applications/Jamf Connect.app/Contents/Info.plist"
+                }
+            ]
+        },
+        {
+            "listitem": "Arctic Wolf",
+            "icon": "74b311abbe71dca3f425392d22ed4b60c0737175d1a0746dfb6a530330bd5683",
+            "progresstext": "Arctic Wolf delivers dynamic 24x7 cybersecurity protection",
+            "trigger_list": [
+                {
+                    "trigger": "Arctic Wolf",
+                    "path": "/Library/ArcticWolfNetworks/Agent/bin/scout-client"
+                }
+            ]
+        },
+        {
+            "listitem": "Sentinel One",
+            "icon": "b19cf126be6e8c20f2906be53378161eefb6a88e9bffdd36d91ad5b1e36420d5",
+            "progresstext": "Endpoint security software that defends every endpoint against every type of attack.",
+            "trigger_list": [
+                {
+                    "trigger": "Sentinel One",
+                    "path": "/Applications/SentinelOne/SentinelOne Extensions.app/Contents/Info.plist"
+                }
+            ]
+        },
+
+        {
             "listitem": "FileVault Disk Encryption",
             "icon": "f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
             "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
@@ -102,75 +236,24 @@ policy_array=('
             ]
         },
         {
-            "listitem": "Sophos Endpoint",
-            "icon": "c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
-            "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
-            "trigger_list": [
-                {
-                    "trigger": "sophosEndpoint",
-                    "path": "/Applications/Sophos/Sophos Endpoint.app/Contents/Info.plist"
-                }
-            ]
-        },
-        {
-            "listitem": "Palo Alto GlobalProtect",
-            "icon": "fcccf5d72ad9a4f6d3a4d780dcd8385378a0a8fd18e8c33ad32326f5bd53cca0",
-            "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
-            "trigger_list": [
-                {
-                    "trigger": "globalProtect",
-                    "path": "/Applications/GlobalProtect.app/Contents/Info.plist"
-                }
-            ]
-        },
-        {
-            "listitem": "Microsoft Teams",
-            "icon": "dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
-            "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
-            "trigger_list": [
-                {
-                    "trigger": "microsoftTeams",
-                    "path": "/Applications/Microsoft Teams.app/Contents/Info.plist"
-                }
-            ]
-        },
-        {
-            "listitem": "Zoom",
-            "icon": "be66420495a3f2f1981a49a0e0ad31783e9a789e835b4196af60554bf4c115ac",
-            "progresstext": "Zoom is a videotelephony software program developed by Zoom Video Communications.",
-            "trigger_list": [
-                {
-                    "trigger": "zoom",
-                    "path": "/Applications/zoom.us.app/Contents/Info.plist"
-                }
-            ]
-        },
-        {
-            "listitem": "Google Chrome",
-            "icon": "12d3d198f40ab2ac237cff3b5cb05b09f7f26966d6dffba780e4d4e5325cc701",
-            "progresstext": "Google Chrome is a browser that combines a minimal design with sophisticated technology to make the Web faster.",
-            "trigger_list": [
-                {
-                    "trigger": "googleChrome",
-                    "path": "/Applications/Google Chrome.app/Contents/Info.plist"
-                }
-            ]
-        },
-        {
             "listitem": "Final Configuration",
             "icon": "00d7c19b984222630f20b6821425c3548e4b5094ecd846b03bde0994aaf08826",
-            "progresstext": "Finalizing Configuration …",
+            "progresstext": "Finalizing VentureWell Configuration …",
             "trigger_list": [
                 {
-                    "trigger": "finalConfiguration",
+                    "trigger": "dockutil",
                     "path": ""
                 },
                 {
-                    "trigger": "reconAtReboot",
+                    "trigger": "macOSLAPS",
                     "path": ""
                 },
                 {
-                    "trigger": "computerNameSet",
+                    "trigger": "computer-name",
+                    "path": ""
+                },
+                {
+                    "trigger": "remove admin",
                     "path": ""
                 }
             ]
@@ -197,7 +280,7 @@ policy_array=('
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeTitle="Welcome to your new Mac!"
-welcomeMessage="To begin, please enter your Mac's **Asset Tag**, then click **Continue** to start applying Church settings to your new Mac.  \n\nOnce completed, the **Quit** button will be re-enabled and you'll be prompted to restart your Mac.  \n\nIf you need assistance, please contact the Help Desk: +1 (801) 555-1212."
+welcomeMessage="Please wait while the following apps are downloaded and installed. These are just the core apps, many more are available in our [Self Service](jamfselfservice://) app which will show up in your Dock once this process is complete."
 
 appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
 
@@ -221,13 +304,11 @@ dialogWelcomeCMD="$dialogApp \
 --button1text \"Continue\" \
 --button2text \"Quit\" \
 --button2disabled \
---infotext \"$scriptVersion\" \
---blurscreen \
+--infotext \"v$scriptVersion\" \
 --ontop \
 --titlefont 'size=26' \
 --messagefont 'size=16' \
 --textfield \"Asset Tag\",required=true,prompt=\"Please enter your Mac's seven-digit Asset Tag\",regex='^(AP|IP)?[0-9]{6,}$',regexerror=\"Please enter (at least) seven digits for the Asset Tag, optionally preceed by either 'AP' or 'IP'. \" \
---quitkey k \
 --commandfile \"$welcomeCommandFile\" "
 
 
@@ -237,7 +318,7 @@ dialogWelcomeCMD="$dialogApp \
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 title="Setting up your Mac"
-message="Please wait while the following apps are installed …"
+message="Please wait while the following apps are downloaded and installed. These are just the core apps, many more are available in our [Self Service](jamfselfservice://) app which will show up in your Dock once this process is complete."
 overlayicon=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
 
 # Set initial icon based on whether the Mac is a desktop or laptop
@@ -254,22 +335,20 @@ fi
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 dialogSetupYourMacCMD="$dialogApp \
---title \"$title\" \
+--title \"none\" \
+--bannerimage \"https://github.com/unfo33/venturewell-image/blob/main/setting_up_your_mac.jpeg?raw=true\" \
 --message \"$message\" \
 --icon \"$icon\" \
 --progress \
 --progresstext \"Initializing configuration …\" \
 --button1text \"Quit\" \
 --button1disabled \
---infotext \"$scriptVersion\" \
+--infotext \"v$scriptVersion\" \
 --titlefont 'size=28' \
 --messagefont 'size=14' \
---height '70%' \
 --position 'centre' \
---blurscreen \
 --ontop \
---overlayicon \"$overlayicon\" \
---quitkey k \
+--moveable 1 \
 --commandfile \"$setupYourMacCommandFile\" "
 
 
@@ -298,10 +377,9 @@ dialogFailureCMD="$dialogApp \
 --height 375 \
 --position topright \
 --button1text \"Close\" \
---infotext \"$scriptVersion\" \
+--infotext \"v$scriptVersion\" \
 --titlefont 'size=22' \
 --messagefont 'size=14' \
---overlayicon \"$overlayicon\" \
 --commandfile \"$failureCommandFile\" "
 
 
@@ -381,9 +459,9 @@ function dialog_update_welcome() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function dialog_update_setup_your_mac() {
-    echo_logger "SETUP YOUR MAC DIALOG: $1"
-    echo "$1" >> $setupYourMacCommandFile
-    sleep 0.35
+  echo_logger "SETUP YOUR MAC DIALOG: $1"
+  echo "$1" >> $setupYourMacCommandFile
+  sleep 0.35
 }
 
 
@@ -393,9 +471,9 @@ function dialog_update_setup_your_mac() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function dialog_update_failure(){
-    echo_logger "FAILURE DIALOG: $1"
-    echo "$1" >> $failureCommandFile
-    sleep 0.35
+  echo_logger "FAILURE DIALOG: $1"
+  echo "$1" >> $failureCommandFile
+  sleep 0.35
 }
 
 
@@ -420,7 +498,7 @@ function finalise(){
         if [[ ${debugMode} == "true" ]]; then
             dialog_update_failure "title: DEBUG MODE | $failureTitle"
         fi
-        dialog_update_failure "message: A failure has been detected. Please complete the following steps:\n1. Reboot and login to your Mac  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed to install:  \n${jamfProPolicyPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the Help Desk,  \n+1 (801) 555-1212, and mention [KB86753099](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB86753099#Failures). "
+        dialog_update_failure "message: A failure has been detected. Please complete the following steps:\n1. Reboot and login to your Mac  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed to install:  \n${jamfProPolicyPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact support,  \nsupport@venturewell.org."
         dialog_update_failure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
         eval "${completionAction}"
         dialog_update_failure "quit:"
@@ -432,7 +510,7 @@ function finalise(){
 
         dialog_update_setup_your_mac "icon: SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
         dialog_update_setup_your_mac "progress: complete"
-        dialog_update_setup_your_mac "progresstext: Complete! Please restart and enjoy your new Mac!"
+        dialog_update_setup_your_mac "progresstext: Complete! Please enjoy your new Mac!"
         dialog_update_setup_your_mac "button1text: Quit"
         dialog_update_setup_your_mac "button1: enable"
         rm "$setupYourMacCommandFile"
@@ -512,8 +590,6 @@ if [[ $(id -u) -ne 0 ]]; then
   echo "This script should be run as root"
   exit 1
 fi
-
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Initialize Log
@@ -650,7 +726,6 @@ for (( i=0; i<dialog_step_length; i++ )); do
     dialog_update_setup_your_mac "listitem: index: $i, icon: ${setupYourMacPolicyArrayIconPrefixUrl}${icon_url_array[$i]}, status: pending, statustext: Pending …"
 done
 dialog_update_setup_your_mac "list: show"
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
